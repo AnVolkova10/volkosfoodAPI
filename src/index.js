@@ -9,6 +9,6 @@ app.use(express.json())
 app.listen(3000)
 
 app.use(indexRoutes)
-app.use(foodRoutes)
+app.use('/api', foodRoutes)
 
 console.log('working')

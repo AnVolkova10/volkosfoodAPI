@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import {
+  getFoods,
   getFood,
   createFood,
   updateFood,
@@ -8,12 +9,13 @@ import {
 
 const router = Router()
 
-router.get('/food', getFood)
+router.get('/food', getFoods)
+router.get('/food/:id', getFood)
 
 router.post('/food', createFood)
 
-router.put('/food', updateFood)
+router.patch('/food/:id', updateFood)
 
-router.delete('/food', deleteFood)
+router.delete('/food/:id', deleteFood)
 
 export default router

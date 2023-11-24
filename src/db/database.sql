@@ -15,15 +15,16 @@ CREATE TABLE food (
     market_limit INT(10) NOT NULL,
     diet_limit INT(10),
     PRIMARY KEY (id)
-) DESCRIBE food;
+);
+DESCRIBE food;
 INSERT INTO food
 VALUES (
         1,
-        'Manzana verde',
+        'manzana verde',
         'green-apple.png',
         1,
-        'Verdulería',
-        'Heladera',
+        'verduleria',
+        'heladera',
         'fruta',
         'dulce',
         1,
@@ -34,11 +35,11 @@ VALUES (
     ),
     (
         2,
-        'Zanahoria',
+        'zanahoria',
         'carrot.png',
         2,
-        'Verdulería',
-        'Heladera',
+        'verduleria',
+        'heladera',
         'verdura',
         'salado',
         1,
@@ -49,11 +50,11 @@ VALUES (
     ),
     (
         3,
-        'Tomate',
+        'tomate',
         'tomato.png',
         3,
-        'Verdulería',
-        'Heladera',
+        'verduleria',
+        'heladera',
         'verdura',
         'salado',
         1,
