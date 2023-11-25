@@ -9,6 +9,7 @@ export const getFoods = async (req, res) => {
     return res.status(500).json({ message: 'algo fue mal' })
   }
 }
+
 export const getFood = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM food WHERE id = ?', [
@@ -74,8 +75,8 @@ export const createFood = async (req, res) => {
       market_limit,
       diet_limit,
     })
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error(error)
     res.status(500).send({ error: 'An error occurred while creating the food' })
   }
 }
@@ -96,25 +97,27 @@ export const updateFood = async (req, res) => {
     market_limit,
     diet_limit,
   } = req.body
+
+  const query = `UPDATE food SET name = IFNULL(?, name), type = IFNULL(?, type), image = IFNULL(?, image), quantity = IFNULL(?, quantity), market = IFNULL(?, market), storage = IFNULL(?, storage), taste = IFNULL(?, taste), healthy = IFNULL(?, healthy), few_left = IFNULL(?, few_left), due_date = IFNULL(?, due_date), market_limit = IFNULL(?, market_limit), diet_limit = IFNULL(?, diet_limit) WHERE id = ?`
+
+  const values = [
+    name,
+    type,
+    image,
+    quantity,
+    market,
+    storage,
+    taste,
+    healthy,
+    few_left,
+    due_date,
+    market_limit,
+    diet_limit,
+    id,
+  ]
+
   try {
-    const [result] = await pool.query(
-      'UPDATE food SET name = IFNULL(?, name), type = IFNULL(?, type), image = IFNULL(?, image), quantity = IFNULL(?, quantity), market = IFNULL(?, market), storage = IFNULL(?, storage), taste = IFNULL(?, taste), healthy = IFNULL(?, healthy), few_left = IFNULL(?, few_left), due_date = IFNULL(?, due_date), market_limit = IFNULL(?, market_limit), diet_limit = IFNULL(?, diet_limit) WHERE id = ?',
-      [
-        name,
-        type,
-        image,
-        quantity,
-        market,
-        storage,
-        taste,
-        healthy,
-        few_left,
-        due_date,
-        market_limit,
-        diet_limit,
-        id,
-      ]
-    )
+    const [result] = await pool.query(query, values)
 
     if (result.affectedRows <= 0)
       return res.status(404).json({ message: 'food not found' })
