@@ -16,7 +16,6 @@ CREATE TABLE food (
     diet_limit INT(10),
     PRIMARY KEY (id)
 );
-DESCRIBE food;
 INSERT INTO food
 VALUES (
         1,
@@ -63,3 +62,25 @@ VALUES (
         1,
         null
     );
+CREATE TABLE recipe (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    ingredients TEXT,
+    accesories TEXT,
+    meals VARCHAR(255) NOT NULL,
+    image VARCHAR(255),
+    difficulty INT NOT NULL,
+    steps VARCHAR(255),
+    duration VARCHAR(255) NOT NULL,
+    taste VARCHAR(255) NOT NULL,
+    quantity INT,
+    healthy BOOLEAN NOT NULL,
+    rating INT NOT NULL
+);
+CREATE TABLE recipe_ingredient (
+    recipe_id INT,
+    ingredient_id INT,
+    quantity INT,
+    FOREIGN KEY (recipe_id) REFERENCES recipe(id),
+    FOREIGN KEY (ingredient_id) REFERENCES food(id)
+);
