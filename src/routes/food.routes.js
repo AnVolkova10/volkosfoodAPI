@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
   getFoods,
+  getAvailableFoods,
   getFood,
   createFood,
   updateFood,
@@ -10,6 +11,7 @@ import {
 const router = Router()
 
 router.get('/food', getFoods)
+router.get('/food/available', getAvailableFoods)
 router.get('/food/:id', getFood)
 
 router.post('/food', createFood)

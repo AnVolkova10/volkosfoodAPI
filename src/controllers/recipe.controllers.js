@@ -10,6 +10,31 @@ export const getRecipes = async (req, res) => {
   }
 }
 
+export const getAvailableRecipes = async (req, res) => {
+  try {
+    const query = `
+      SELECT DISTINCT recipe.*
+      FROM recipe
+      JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id
+      JOIN food ON recipe_ingredient.ingredient_id = food.id
+      GROUP BY recipe.id
+      HAVING MIN(food.quantity >= recipe_ingredient.quantity)
+    `
+
+    const [rows] = await pool.query(query)
+
+    if (rows.length <= 0)
+      return res
+        .status(404)
+        .json({ message: 'No recipes found with available ingredients' })
+
+    res.json(rows)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: 'Algo salió mal' })
+  }
+}
+
 export const getRecipe = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM recipe WHERE id = ?', [
@@ -137,6 +162,72 @@ export const createRecipe = async (req, res) => {
     res
       .status(500)
       .send({ error: 'An error occurred while creating the recipe' })
+  }
+}
+
+export const useRecipe = async (req, res) => {
+  const recipeId = req.params.id
+
+  try {
+    const [recipeRows] = await pool.query('SELECT * FROM recipe WHERE id = ?', [
+      recipeId,
+    ])
+    const [ingredientRows] = await pool.query(
+      'SELECT * FROM recipe_ingredient WHERE recipe_id = ?',
+      [recipeId]
+    )
+
+    if (recipeRows.length <= 0) {
+      return res.status(404).json({ message: 'Recipe not found' })
+    }
+
+    for (let ingredient of ingredientRows) {
+      const [foodRow] = await pool.query('SELECT * FROM food WHERE id = ?', [
+        ingredient.ingredient_id,
+      ])
+
+      if (foodRow.length <= 0 || foodRow[0].quantity < ingredient.quantity) {
+        return res
+          .status(400)
+          .json({ message: 'Insufficient quantity of ingredients' })
+      }
+    }
+
+    for (let ingredient of ingredientRows) {
+      const updatedQuantity = ingredient.quantity
+
+      await pool.query('UPDATE food SET quantity = quantity - ? WHERE id = ?', [
+        updatedQuantity,
+        ingredient.ingredient_id,
+      ])
+
+      const [updatedFood] = await pool.query(
+        'SELECT * FROM food WHERE id = ?',
+        [ingredient.ingredient_id]
+      )
+
+      if (
+        updatedFood.length > 0 &&
+        (updatedFood[0].quantity <= updatedFood[0].market_limit ||
+          updatedFood[0].few_left === true)
+      ) {
+        const [existingFood] = await pool.query(
+          'SELECT * FROM shopping_list WHERE food_id = ?',
+          [ingredient.ingredient_id]
+        )
+
+        if (existingFood.length === 0) {
+          await pool.query('INSERT INTO shopping_list (food_id) VALUES (?)', [
+            ingredient.ingredient_id,
+          ])
+        }
+      }
+    }
+
+    res.json({ message: 'Recipe used successfully' })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: 'Something went wrong' })
   }
 }
 

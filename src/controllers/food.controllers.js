@@ -10,6 +10,19 @@ export const getFoods = async (req, res) => {
   }
 }
 
+export const getAvailableFoods = async (req, res) => {
+  try {
+    const query = 'SELECT * FROM food WHERE quantity > 0'
+    const [rows] = await pool.query(query)
+    res.json(rows)
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(500)
+      .json({ message: 'Algo salió mal al obtener los alimentos disponibles' })
+  }
+}
+
 export const getFood = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM food WHERE id = ?', [
@@ -133,16 +146,26 @@ export const updateFood = async (req, res) => {
 
 export const deleteFood = async (req, res) => {
   try {
-    const [result] = await pool.query('DELETE FROM food WHERE id = ?', [
-      req.params.id,
-    ])
+    const foodId = req.params.id
 
-    if (result.affectedRows <= 0)
-      return res.status(404).json({ message: 'food not found' })
+    const [ingredientRows] = await pool.query(
+      'SELECT * FROM recipe_ingredient WHERE ingredient_id = ? LIMIT 1',
+      [foodId]
+    )
+
+    if (ingredientRows.length > 0) {
+      return res.status(400).json({ message: 'This food is used in a recipe' })
+    }
+
+    const [result] = await pool.query('DELETE FROM food WHERE id = ?', [foodId])
+
+    if (result.affectedRows <= 0) {
+      return res.status(404).json({ message: 'Food not found' })
+    }
 
     res.sendStatus(204)
   } catch (error) {
     console.error(error)
-    return res.status(500).json({ message: 'algo fue mal' })
+    return res.status(500).json({ message: 'Something went wrong' })
   }
 }

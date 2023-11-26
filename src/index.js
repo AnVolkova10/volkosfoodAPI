@@ -4,6 +4,7 @@ import {
   createRecipeTable,
   createFoodTable,
   createRecipeIngredientTable,
+  createShoppingListTable,
 } from './db.js'
 
 createRecipeTable()
@@ -12,8 +13,14 @@ createRecipeTable()
       .then(() => {
         createRecipeIngredientTable()
           .then(() => {
-            app.listen(PORT)
-            console.log('running on', PORT)
+            createShoppingListTable()
+              .then(() => {
+                app.listen(PORT)
+                console.log('Running on', PORT)
+              })
+              .catch((err) => {
+                console.error('Error creating shopping_list table', err)
+              })
           })
           .catch((err) => {
             console.error('Error creating recipe_ingredient table', err)

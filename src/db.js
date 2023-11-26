@@ -69,3 +69,15 @@ export async function createRecipeIngredientTable() {
   `)
   return rows
 }
+
+export async function createShoppingListTable() {
+  const [rows, fields] = await pool.query(`
+    CREATE TABLE IF NOT EXISTS shopping_list (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      food_id INT,
+      quantity INT,
+      FOREIGN KEY (food_id) REFERENCES food(id)
+    );
+  `)
+  return rows
+}
