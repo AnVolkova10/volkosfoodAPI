@@ -52,7 +52,7 @@ export const getRecipe = async (req, res) => {
 
 export const getRandomRecipe = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+    let query = `
       SELECT recipe.*
       FROM recipe
       JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id
@@ -61,7 +61,23 @@ export const getRandomRecipe = async (req, res) => {
       HAVING MIN(food.quantity >= recipe_ingredient.quantity)
       ORDER BY RAND()
       LIMIT 1;
-    `)
+    `
+
+    if (req.query.typeMeals) {
+      query = `
+        SELECT recipe.*
+        FROM recipe
+        JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id
+        LEFT JOIN food ON recipe_ingredient.ingredient_id = food.id
+        WHERE recipe.meals = ? 
+        GROUP BY recipe.id
+        HAVING MIN(food.quantity >= recipe_ingredient.quantity)
+        ORDER BY RAND()
+        LIMIT 1;
+      `
+    }
+
+    const [rows] = await pool.query(query, [req.query.typeMeals])
 
     if (rows.length <= 0)
       return res
@@ -167,6 +183,7 @@ export const createRecipe = async (req, res) => {
 
 export const useRecipe = async (req, res) => {
   const recipeId = req.params.id
+  const { ingredientQuantities } = req.body // Suponiendo que las nuevas cantidades se envían en un objeto como 'ingredientQuantities'
 
   try {
     const [recipeRows] = await pool.query('SELECT * FROM recipe WHERE id = ?', [
@@ -182,11 +199,16 @@ export const useRecipe = async (req, res) => {
     }
 
     for (let ingredient of ingredientRows) {
+      const updatedQuantity =
+        ingredientQuantities && ingredientQuantities[ingredient.ingredient_id]
+          ? ingredientQuantities[ingredient.ingredient_id]
+          : ingredient.quantity
+
       const [foodRow] = await pool.query('SELECT * FROM food WHERE id = ?', [
         ingredient.ingredient_id,
       ])
 
-      if (foodRow.length <= 0 || foodRow[0].quantity < ingredient.quantity) {
+      if (foodRow.length <= 0 || foodRow[0].quantity < updatedQuantity) {
         return res
           .status(400)
           .json({ message: 'Insufficient quantity of ingredients' })
@@ -194,7 +216,10 @@ export const useRecipe = async (req, res) => {
     }
 
     for (let ingredient of ingredientRows) {
-      const updatedQuantity = ingredient.quantity
+      const updatedQuantity =
+        ingredientQuantities && ingredientQuantities[ingredient.ingredient_id]
+          ? ingredientQuantities[ingredient.ingredient_id]
+          : ingredient.quantity
 
       await pool.query('UPDATE food SET quantity = quantity - ? WHERE id = ?', [
         updatedQuantity,

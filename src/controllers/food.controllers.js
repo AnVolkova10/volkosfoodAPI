@@ -137,6 +137,18 @@ export const updateFood = async (req, res) => {
 
     const [rows] = await pool.query('SELECT * FROM food WHERE id = ?', [id])
 
+    if (few_left !== rows[0].few_left && rows[0].few_left !== null) {
+      if (few_left) {
+        await pool.query('INSERT INTO shopping_list (food_id) VALUES (?)', [id])
+      } else {
+        await pool.query('DELETE FROM shopping_list WHERE food_id = ?', [id])
+      }
+    }
+
+    if (rows[0].quantity > rows[0].market_limit) {
+      await pool.query('DELETE FROM shopping_list WHERE food_id = ?', [id])
+    }
+
     res.json(rows[0])
   } catch (error) {
     console.error(error)
