@@ -25,7 +25,7 @@ export async function createRecipeTable() {
       meals VARCHAR(255) NOT NULL,
       image VARCHAR(255),
       difficulty INT NOT NULL,
-      steps VARCHAR(255),
+      steps TEXT,
       duration VARCHAR(255) NOT NULL,
       taste VARCHAR(255) NOT NULL,
       quantity INT,

@@ -16,52 +16,6 @@ CREATE TABLE food (
     diet_limit INT(10),
     PRIMARY KEY (id)
 );
-INSERT INTO food
-VALUES (
-        1,
-        'manzana verde',
-        'green-apple.png',
-        1,
-        'verduleria',
-        'heladera',
-        'fruta',
-        'dulce',
-        1,
-        1,
-        null,
-        1,
-        null
-    ),
-    (
-        2,
-        'zanahoria',
-        'carrot.png',
-        2,
-        'verduleria',
-        'heladera',
-        'verdura',
-        'salado',
-        1,
-        0,
-        null,
-        0,
-        null
-    ),
-    (
-        3,
-        'tomate',
-        'tomato.png',
-        3,
-        'verduleria',
-        'heladera',
-        'verdura',
-        'salado',
-        1,
-        0,
-        null,
-        1,
-        null
-    );
 CREATE TABLE recipe (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -70,7 +24,7 @@ CREATE TABLE recipe (
     meals VARCHAR(255) NOT NULL,
     image VARCHAR(255),
     difficulty INT NOT NULL,
-    steps VARCHAR(255),
+    steps TEXT,
     duration VARCHAR(255) NOT NULL,
     taste VARCHAR(255) NOT NULL,
     quantity INT,
