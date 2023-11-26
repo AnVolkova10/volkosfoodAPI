@@ -1,9 +1,12 @@
 import express from 'express'
+import cors from 'cors'
 import indexRoutes from './routes/index.routes.js'
 import foodRoutes from './routes/food.routes.js'
 import recipeRoutes from './routes/recipe.routes.js'
 
 const app = express()
+
+app.use(cors())
 
 app.use(express.json())
 
